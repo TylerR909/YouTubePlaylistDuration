@@ -16,11 +16,15 @@ function main() {
 }
 
 function createElements() {
+    timeElement = document.getElementById('timeElement');
+    if (timeElement) {
+        removeElements();
+    }
     const statsBlock = document.getElementById('stats');
     timeElement = document.createElement('yt-formatted-string');
     timeElement.id = 'timeElement';
-    timeElement.classList = 'style-scope ytd-playlist-sidebar-primary-info-renderer';
     statsBlock.appendChild(timeElement);
+    timeElement.classList = 'style-scope ytd-playlist-sidebar-primary-info-renderer';
     timeElement.innerText = 0;
 }
 
