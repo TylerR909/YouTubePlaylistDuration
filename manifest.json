@@ -1,0 +1,14 @@
+{
+    "manifest_version" : 2,
+    "name" : "YouTube Playlist Length",
+    "description" : "Adds playlist playtime to playlist stats",
+    "version" : "0.1",
+    "content_scripts": [
+        {
+            "matches" : [
+                "https://www.youtube.com/playlist*"
+            ],
+            "js": ["index.js"]
+        }
+    ]
+}
