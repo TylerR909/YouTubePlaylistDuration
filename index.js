@@ -1,74 +1,78 @@
-let timeElement; 
-let time = 0;
+let timeElement;
 let timeCalcEvent;
-let timeCalcCounter = 0;
 
 function main() {
     createElements();
-    timeCalcEvent = setInterval(function() {
-        time = 0;
-        calculateTimes();
-
-        if (++timeCalcCounter > 20) {
-            clearTimeEvent();
-        }
-    }, 500);
+    console.log('Starting YPD event');
+    timeCalcEvent = setInterval(calculateTime, 2000);
 }
 
 function createElements() {
-    timeElement = document.getElementById('timeElement');
-    if (timeElement) {
-        removeElements();
+    if (! document.getElementById('timeElement')) {
+        const statsBlock = document.getElementById('stats');
+        timeElement = document.createElement('yt-formatted-string');
+        timeElement.id = 'timeElement';
+        statsBlock.appendChild(timeElement);
+        timeElement.classList = 'style-scope ytd-playlist-sidebar-primary-info-renderer';
     }
-    const statsBlock = document.getElementById('stats');
-    timeElement = document.createElement('yt-formatted-string');
-    timeElement.id = 'timeElement';
-    statsBlock.appendChild(timeElement);
-    timeElement.classList = 'style-scope ytd-playlist-sidebar-primary-info-renderer';
-    timeElement.innerText = 0;
 }
 
-function calculateTimes() {
+function calculateTime() {
     const contents = document.getElementById('contents');
-    const times = contents.getElementsByClassName('ytd-thumbnail-overlay-time-status-renderer')
+    const times = contents.getElementsByClassName('ytd-thumbnail-overlay-time-status-renderer');
 
-    Array.prototype.forEach.call(times, function(item) {
-        const elementTime = item.innerText;
-        addTime(elementTime);
-        renderTimeFromSeconds();
+    let newTime = 0;
+
+    Array.prototype.forEach.call(times, item => {
+        newTime += getSecondsFromTimestamp(item.innerText);
     });
+
+    renderTimeFromSeconds(newTime);
 
     if (times.length >= 100) {
         timeElement.innerText += '+';
         timeElement.title = "100+ items in list. Time may not be accurate.";
-    }
+    } 
 }
 
-function addTime(timeToAdd) {
-    let [sec, min, hr] = timeToAdd.split(':').reverse();
+function getSecondsFromTimestamp(timestamp) {
+    let [sec=0, min=0, hr=0] = timestamp.split(':').reverse();
+    sec = Number(sec);
     sec += min * 60;
     sec += hr * 60 * 60;
-    time += sec;
+    return sec;
 }
 
-function renderTimeFromSeconds() {
-    const renderedTime = new Date(null);
-    renderedTime.setSeconds(time);
-    timeElement.innerText = renderedTime.toISOString().substr(11,8);
+function renderTimeFromSeconds(totalSeconds) {
+    const sec = totalSeconds % 60;
+    const min = Math.floor((totalSeconds/60) % 60);
+    const hr = Math.floor(totalSeconds/60/60);
+
+    let timeStr = `${sec}s`;
+    if (min || hr) {
+        timeStr = `${min}m ${timeStr}`
+    }
+    if (hr) {
+        timeStr = `${hr}h ${timeStr}`
+    }
+    timeElement.innerText = timeStr;
 }
 
 function removeElements() {
-    timeElement.parentNode.removeChild(timeElement);
-    clearTimeEvent();
+    if (timeElement) {
+        timeElement.parentNode.removeChild(timeElement);
+    }
+    stopEvent();
 }
 
-function clearTimeEvent() {
+function stopEvent() {
     if (timeCalcEvent) {
-        clearInterval(timeCalcEvent)
+        console.log('Stopping YPD event');
+        clearInterval(timeCalcEvent);
         timeCalcEvent = null;
     }
 }
 
-window.addEventListener('load', function(event) { setTimeout(main, 2000); });
-window.addEventListener('yt-page-data-updated',function(event) { setTimeout(main, 2000); });
+window.addEventListener('load', main);
+window.addEventListener('yt-page-data-updated', main);
 window.addEventListener('yt-navigate-start', removeElements);
