@@ -45,10 +45,10 @@ function calculateTimes() {
 }
 
 function addTime(timeToAdd) {
-    const timeArray = timeToAdd.split(':').reverse();
-    for (let i = 0; i < timeArray.length; i++) {
-        time += Number(timeArray[i]) * Math.pow(60, i);
-    }
+    let [sec, min, hr] = timeToAdd.split(':').reverse();
+    sec += min * 60;
+    sec += hr * 60 * 60;
+    time += sec;
 }
 
 function renderTimeFromSeconds() {
